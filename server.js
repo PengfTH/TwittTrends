@@ -34,9 +34,25 @@ var client = SNSClient(function(err, message) {
     }
 });
 
+app.post('/', function(request, response) {
+    console.log(request);
+    var body = request.body;
+    var type = body['Type'];
+    if (type == 'SubscriptionConfirmation') {
+        var req = require('request');
+        var url = body['SubscribeURL'];
+        response.send(req.get(url));
+    }
+    else if (type=='Notification') {
+        var msg = body['Message'];
+        curSocket.emit("tweets::messgae", {msg: msg}));
+    }
+});
+
 app.post('/newTweet', function (request, response) {
     client(request, response);
 });
+
 
 
 // beginning socket transmission in response to io.connect() at the client side
