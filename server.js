@@ -37,8 +37,9 @@ var client = SNSClient(function(err, message) {
 
 app.post('/', function(request, response) {
     console.log("posthttp");
-    console.log(request["Message"]);
-    var type = request.body.Type;
+    console.log(request);
+    client(request, response);
+    /* var type = request.body.Type;
     if (type == 'SubscriptionConfirmation') {
         console.log('SNS');
         var req = require('request');
@@ -52,6 +53,7 @@ app.post('/', function(request, response) {
     }
     var req = require('request');
     response.send(req.get('http://google.com'));
+    */
 });
 
 app.post('/newTweet', function (request, response) {
