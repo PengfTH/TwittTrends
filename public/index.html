@@ -1,78 +1,36 @@
-<!doctype html>
 <html>
-  <head>
-    <title>TweetMap!</title>
-    <meta charset="utf-8">
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-		<script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-		<style>
-			body {
-				margin: 0;
-				padding: 0;
-			}
-			#map {
-				position: absolute;
-				height: 100%;
-				width:80%;
-			}
-			#sidebar {
-				position: absolute;
-				right: 0px;
-				padding: 5px;
-                margin-left: 10px;
-                margin-right: 10px;
-                margin-top: 5px;
-				border: 5px solid #eee;
-				text-align: center;
-			}
+<head>
 
-            #heading {
-                margin-top: 10px;
-                margin-bottom: 5px;
-            }
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4FPsdZjwzFZlhVi0b1iZFJp4JXTQoEaY"></script>
 
-            #trending-topics p {
-                margin: 5px;
-            }
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 
-		</style>
-  </head>
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 
-  <body>
-		<div id="map"></div>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-		<div id="sidebar">
-            <h4 id="heading">Statistics</h4>
-            <div id="counter"> </div>
-            <div id="positive-counter"> </div>
-            <div id="negative-counter"> </div>
-            <div id="neutral-counter"> </div>
+</head>
 
-            <h4 id="heading">Trends from around the World</h4>
-            <h5 id="heading">Select a place from the list</h5>
-            <select id='dropdown' name='keywords'>
-				<option value='2459115'>New York</option>
-				<option value='615702'>Paris</option>
-				<option value='2295411'>Mumbai</option>
-				<option value='2490383'>Seattle</option>
-				<option value='23424977'>United States</option>
-				<option value='23424848'>India</option>
-				<option value='23424975'>United Kingdom</option>
-				<option value='23424936'>Russia</option>
-				<option value='23424781'>China</option>
-                <option value='23424748'>Australia</option>
-                <option value='23424942'>South Africa</option>
-                <option value='23424853'>Italy</option>
-                <option value='23424768'>Brazil</option>
-                <option value='23424901'>Malaysia</option>
-			</select>
+<body>
 
-            <div id="trending-topics"> </div>
+<div id="map-canvas" style="width: 60%; height: 100%;float:left"></div>
+<div id="pano" style="width: 40%; height: 100%;float:left"></div>
 
-	</div>
+<div style="position:absolute;top:30px;left:150px;">
+    Center Coordinate <input id="center" type="text" name="center" maxlength=100 readonly>,   
+     Radius <input id="radius" type="text" name="radius" maxlength=100>km
+</div>
+<div style="position:absolute;top:60px;left:150px;">
+    keyword <input id="kw" style="width:200px;height:20px;" type="text">
+    <button id="search" type="button">Search</button>
+</div>
 
-	<script src="/assets/main.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&callback=initMap"></script>
-  </body>
+<div id="tagclouds" style="position:absolute;top:70px;right:70px;width:280px;height:280px;">
+<script type="text/javascript">
+</script>
+</div>
+<script src="/assets/main.js"></script>
+
+
+</body>
 </html>

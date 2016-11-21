@@ -1,43 +1,22 @@
 // top level variables
-var mapPoints, map, markers = [], tweetPoints = [];
+var mapPoints, map, sv, panorama, markers = [], tweetPoints = [];
 var pos, neg, neu, socket;
-function loadFilteredMapPoints(keyword) {
-	while(mapPoints.length > 0) {
-		mapPoints.pop();
-	}
+var center = new google.maps.LatLng(40.758896, -73.985130);
 
-	var points = tweetPoints;
-
-	if (keyword !== "all") {
-		points = tweetPoints.filter(function(tweet) {
-			return tweet.category.indexOf(keyword) > -1
-		})
-	}
-
-
-	points.forEach(function(point) {
-		var p = new google.maps.LatLng(point.coordinates[1], point.coordinates[0]);
-		mapPoints.push(p);
-	});
-
-	$('#sidebar #counter').text("Total points:" + mapPoints.length);
-
-}
 
 function initMap() {
 	mapPoints = new google.maps.MVCArray([]);
 
-	map = new google.maps.Map(document.getElementById('map'), {
-		zoom: 2,
-		center: {lat: 0, lng: 0},
-		mapTypeId: google.maps.MapTypeId.SATELLITE
-	});
-
-	heatmap = new google.maps.visualization.HeatmapLayer({
-		opacity: 1,
-		data: mapPoints,
-		map: map
-	});
+    var mapProp = {
+		  	center:center,
+		  	zoom:2,
+            streetViewControl: false,
+		  	mapTypeId:google.maps.MapTypeId.ROADMAP
+	};
+    sv = new google.maps.StreetViewService();
+    panorama = new google.maps.StreetViewPanorama(document.getElementById('pano'));
+	map = new google.maps.Map(document.getElementById("map-canvas"),mapProp);
+    sv.getPanorama({location: center, radius: 100}, processSVData);
 
 	startListening();
 }
@@ -45,14 +24,7 @@ function initMap() {
 function startListening() {
 	socket = io.connect();
 	socket.on('tweets:connected', function (msg) {
-		pos = 0, neg = 0, neu = 0;
-		while (mapPoints.length > 0) {
-			mapPoints.pop();
-		}
-		while (markers.length > 0) {
-			marker = markers.pop();
-			marker.setMap(null);
-		}
+        //alert(msg);
 	});
 
 	socket.on('tweets:channel', function (tweet) {
@@ -60,36 +32,23 @@ function startListening() {
 			tweetPoints.push(tweet);
 			mapPoints.push(new google.maps.LatLng(tweet.coordinates[1], tweet.coordinates[0]));
 			addMarker(tweet);
-			counterUpdates();
 		}
 	});
-
-	socket.on('trends:response', function (trends) {
-		showTrendingTopics(trends);
-	});
 }
 
-function showTrendingTopics (trends) {
-	$('#sidebar #trending-topics').text("");
-	if(trends["error"] == false ) {
-		trends = trends["trends"];
-		$('#sidebar #trending-topics').append("<h4>Top 10 Trending Topics:</h4>");
-		for (var i = 0; i < trends.length; i++) {
-			$('#sidebar #trending-topics').append("<p>" + trends[i]["name"] + "</p>");
-		}
-	} else {
-		log = trends["trends"]["log"];
-		$('#sidebar #trending-topics').append("<h4>Error</h4>");
-		$('#sidebar #trending-topics').append("<p>" + log.message + "</p>");
-	}
+function processSVData(data, status) {
+        if (status === 'OK') {
+          panorama.setPano(data.location.pano);
+          panorama.setPov({
+            heading: 270,
+            pitch: 0
+          });
+          panorama.setVisible(true);
+        } else {
+          alert('Street View data not found for this location.');
+        }
 }
 
-function counterUpdates () {
-	$('#sidebar #counter').text("Total Tweets: " + tweetPoints.length);
-	$('#sidebar #positive-counter').text("Positive Tweets: " + pos);
-	$('#sidebar #negative-counter').text("Negative Tweets: " + neg);
-	$('#sidebar #neutral-counter').text("Neutral Tweets: " + neu);
-}
 
 function addMarker (tweet) {
 	var icon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
@@ -113,9 +72,8 @@ function addMarker (tweet) {
 	}));
 }
 
+google.maps.event.addDomListener(window, 'load', initMap);
+
+
 $(document).ready(function() {
-	$('#dropdown').change(function(val) {
-		// loadFilteredMapPoints($('#dropdown').val())
-		socket.emit('trend:request', {woeid: parseInt($('#dropdown').val())});
-	});
 });
