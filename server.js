@@ -35,7 +35,7 @@ var client = SNSClient(function(err, message) {
 });
 
 app.post('/', function(request, response) {
-    //console.log(request);
+    console.log("posthttp");
     var body = request.body;
     var type = body['Type'];
     if (type == 'SubscriptionConfirmation') {
@@ -49,6 +49,8 @@ app.post('/', function(request, response) {
         var msg = body['Message'];
         curSocket.emit("tweets::message", {msg: msg});
     }
+    var req = require('request');
+    response.send(req.get('http://google.com'));
 });
 
 app.post('/newTweet', function (request, response) {
