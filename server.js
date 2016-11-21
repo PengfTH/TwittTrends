@@ -45,7 +45,7 @@ app.post('/', function(request, response) {
     }
     else if (type=='Notification') {
         var msg = body['Message'];
-        curSocket.emit("tweets::messgae", {msg: msg}));
+        curSocket.emit("tweets::messgae", {msg: msg});
     }
 });
 
