@@ -39,11 +39,13 @@ app.post('/', function(request, response) {
     var body = request.body;
     var type = body['Type'];
     if (type == 'SubscriptionConfirmation') {
+        console.log('SNS');
         var req = require('request');
         var url = body['SubscribeURL'];
         response.send(req.get(url));
     }
     else if (type=='Notification') {
+        console.log('SNS');
         var msg = body['Message'];
         curSocket.emit("tweets::message", {msg: msg});
     }
