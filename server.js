@@ -12,6 +12,7 @@ app.use(express.static(__dirname + "/public"));
 
 // parse application/json
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 var Twitter = require('twitter');
 var client = new Twitter({
@@ -36,9 +37,8 @@ var client = SNSClient(function(err, message) {
 
 app.post('/', function(request, response) {
     console.log("posthttp");
-    console.log(request);
-    var body = request.body;
-    var type = body.Type;
+    console.log(request.body);
+    var type = request.body.Type;
     if (type == 'SubscriptionConfirmation') {
         console.log('SNS');
         var req = require('request');
