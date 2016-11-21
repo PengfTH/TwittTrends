@@ -37,7 +37,7 @@ var client = SNSClient(function(err, message) {
 
 app.post('/', function(request, response) {
     console.log("posthttp");
-    console.log(request.body);
+    console.log(request["Message"]);
     var type = request.body.Type;
     if (type == 'SubscriptionConfirmation') {
         console.log('SNS');
