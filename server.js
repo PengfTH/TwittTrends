@@ -35,7 +35,7 @@ var client = SNSClient(function(err, message) {
 });
 
 app.post('/', function(request, response) {
-    console.log(request);
+    //console.log(request);
     var body = request.body;
     var type = body['Type'];
     if (type == 'SubscriptionConfirmation') {
@@ -45,7 +45,7 @@ app.post('/', function(request, response) {
     }
     else if (type=='Notification') {
         var msg = body['Message'];
-        curSocket.emit("tweets::messgae", {msg: msg});
+        curSocket.emit("tweets::message", {msg: msg});
     }
 });
 
