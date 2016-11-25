@@ -6,6 +6,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var SNSClient = require('aws-snsclient');
+var sns = new AWS.SNS();
 
 // setup static content
 app.use(express.static(__dirname + "/public"));
@@ -35,11 +36,10 @@ var client = SNSClient(function(err, message) {
     }
 });
 
-app.post('/', function(request, response) {
+/*app.post('/', function(request, response) {
     console.log("posthttp");
-    console.log(request);
     client(request, response);
-    /* var type = request.body.Type;
+    var type = request.body.Type;
     if (type == 'SubscriptionConfirmation') {
         console.log('SNS');
         var req = require('request');
@@ -53,11 +53,41 @@ app.post('/', function(request, response) {
     }
     var req = require('request');
     response.send(req.get('http://google.com'));
-    */
-});
 
-app.post('/newTweet', function (request, response) {
+}); */
+
+/*app.post('/newTweet', function (request, response) {
     client(request, response);
+});*/
+
+function handleIncomingMessage( msgType, msgData ) {
+    if( msgType === 'SubscriptionConfirmation') {
+        //confirm the subscription.
+        sns.confirmSubscription({
+            Token: msgData.Token,
+            TopicArn: msgData.TopicArn
+        }, onAwsResponse );
+    } else if ( msgType === 'Notification' ) {
+        curSocket.emit("tweets:connected", {msg: "New Notification"});
+    } else {
+        console.log( 'Unexpected message type ' + msgType );
+    }
+}
+
+app.on('request', function(request, response){
+    request.setEncoding('utf8');
+    var msgBody = '';
+    request.on( 'data', function( data ){
+        msgBody += data;
+    });
+    request.on( 'end', function(){
+        var msgData = parseJSON( msgBody );
+        var msgType = request.headers[ 'x-amz-sns-message-type' ];
+        handleIncomingMessage( msgType, msgData );
+    });
+    // SNS doesn't care about our response as long as it comes
+    // with a HTTP statuscode of 200
+    response.end( 'OK' );
 });
 
 
