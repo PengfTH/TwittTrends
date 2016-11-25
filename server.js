@@ -69,7 +69,7 @@ function handleIncomingMessage( msgType, msgData ) {
             TopicArn: msgData.TopicArn
         }, onAwsResponse );*/
     } else if ( msgType === 'Notification' ) {
-        curSocket.emit("tweets:connected", {msg: "New Notification"});
+        curSocket.emit("tweets:connected", {msg: msgData.Message});
     } else {
         console.log( 'Unexpected message type ' + msgType );
     }
