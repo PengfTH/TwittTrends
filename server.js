@@ -16,12 +16,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 var Twitter = require('twitter');
-var client = new Twitter({
+/*var client = new Twitter({
     consumer_key: 'o3nILrsPVcTdIXKc7DCFsrs8d',
     consumer_secret: 'uUf7Tl0sPBqT0epJt7CPbm0y5lFMKimZDCrvumHjs0xiF9rlQd',
     access_token_key: '783379170810290176-maE3Eqiv3K2Nj9Mm3ehEfNvXdnschSZ',
     access_token_secret: 'ahIrQ0UoRPf90F8527N0ghveBd213S2qJHfKTAgTwFbER'
-});
+});*/
 
 var curSocket = undefined;
 var count = 0;
@@ -62,11 +62,12 @@ var client = SNSClient(function(err, message) {
 
 function handleIncomingMessage( msgType, msgData ) {
     if( msgType === 'SubscriptionConfirmation') {
+        console.log(msgData);
         //confirm the subscription.
-        sns.confirmSubscription({
+        /*sns.confirmSubscription({
             Token: msgData.Token,
             TopicArn: msgData.TopicArn
-        }, onAwsResponse );
+        }, onAwsResponse );*/
     } else if ( msgType === 'Notification' ) {
         curSocket.emit("tweets:connected", {msg: "New Notification"});
     } else {
