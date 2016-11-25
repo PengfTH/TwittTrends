@@ -82,7 +82,7 @@ app.post('/', function(request, response){
         msgBody += data;
     });
     request.on( 'end', function(){
-        var msgData = parseJSON( msgBody );
+        var msgData = JSON.parse( msgBody );
         var msgType = request.headers[ 'x-amz-sns-message-type' ];
         handleIncomingMessage( msgType, msgData );
     });
