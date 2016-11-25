@@ -74,7 +74,8 @@ function handleIncomingMessage( msgType, msgData ) {
     }
 }
 
-app.on('request', function(request, response){
+app.post('/', function(request, response){
+    console.log('post');
     request.setEncoding('utf8');
     var msgBody = '';
     request.on( 'data', function( data ){
