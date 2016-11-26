@@ -82,6 +82,7 @@ function processSVData(data, status) {
 
 function addMarker (tweet) {
 	var icon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+    alert(tweet.sentiment);
 
 	if(tweet.sentiment == "positive") {
 		icon = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
