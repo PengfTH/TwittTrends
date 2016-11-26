@@ -24,7 +24,7 @@ function initMap() {
 function startListening() {
 	socket = io.connect();
 	socket.on('tweets:connected', function (msg) {
-        alert(msg.msg);
+        //alert(msg.msg);
 	});
 
 	socket.on('tweets:channel', function (tweet) {
