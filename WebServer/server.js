@@ -30,7 +30,7 @@ function handleIncomingMessage( msgType, msgData ) {
     if( msgType === 'SubscriptionConfirmation') {
         console.log(msgData);
     } else if ( msgType === 'Notification' ) {
-        curSocket.emit("tweets:connected", {msg: msgData.Message});
+        curSocket.emit("tweets:channel", {msg: msgData.Message});
         //console.log(msgData.Message);
     } else {
         console.log( 'Unexpected message type ' + msgType );
@@ -56,8 +56,6 @@ app.post('/', function(request, response){
 
 function search(msg) {
     console.log(msg.keyword);
-    console.log(msg.center);
-    console.log(msg.radius);
 }
 
 // beginning socket transmission in response to io.connect() at the client side

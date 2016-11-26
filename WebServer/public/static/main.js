@@ -43,14 +43,13 @@ function initMap() {
 function startListening() {
 	socket = io.connect();
 	socket.on('tweets:connected', function (msg) {
-        alert(msg.msg);
+        //alert(msg.msg);
 	});
 
-	socket.on('tweets:channel', function (tweet) {
+	socket.on('tweets:channel', function (msg) {
         if (stream == 1) {
-		    if (tweet.coordinates !== undefined) {
-			    addMarker(tweet);
-		    }
+            tweet = JSON.parse(msg.msg);
+			addMarker(tweet);
         }
 	});
 
@@ -94,13 +93,13 @@ function addMarker (tweet) {
 	}
 
     var marker = new google.maps.Marker({
-		position: {lat: tweet.lat, lng: tweet.lng},
+		position: {lat: tweet.coordinats[1], lng: tweet.coordinates[0]},
 		map: map,
 		icon: icon,
 		animation: google.maps.Animation.DROP
 	})
 
-    var info = new google.maps.InfoWindow({ content: '<div id="content"><div id="siteNotice"></div><h1 id="firstHeading" class="firstHeading">'+obj.usr+'</h1><div id="bodyContent"><p>'+obj.txt+'</p>'});
+    var info = new google.maps.InfoWindow({ content: '<div id="content"><div id="siteNotice"></div><h1 id="firstHeading" class="firstHeading">'+tweet.username+'</h1><div id="bodyContent"><p>'+tweet.text+'</p>'});
 
     marker.addListener('click', function() {
         map.setCenter(marker.getPosition());
@@ -121,12 +120,10 @@ function searchkw(){
     markers = [];
     map.setZoom(2);
     var keyword = $("#kw").val();
-    var center = $("#center").val();
-    var radius = $("#radius").val();
-    if ((center=="" && radius!="") || (center!="" && radius=="")) {
-        alert('Center and radius should be both valid or both null.');
+    if (keyword=="") {
+        alert('Keyword cannot be null.');
     }else {
-        socket.emit('search:request', {keyword: keyword, center: center, radius: radius});
+        socket.emit('search:request', {keyword: keyword});
     }
 }
 
