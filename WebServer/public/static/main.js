@@ -47,7 +47,7 @@ function startListening() {
 	});
 
 	socket.on('tweets:channel', function (msg) {
-        alert(msg.msg);
+        //alert(msg.msg);
         if (stream == 1) {
             tweet = msg.msg;
 			addMarker(tweet);
@@ -94,7 +94,7 @@ function addMarker (tweet) {
 	}
 
     var marker = new google.maps.Marker({
-		position: {lat: tweet.coordinats[1], lng: tweet.coordinates[0]},
+		position: {lat: tweet.coordinates[1], lng: tweet.coordinates[0]},
 		map: map,
 		icon: icon,
 		animation: google.maps.Animation.DROP
