@@ -1,11 +1,11 @@
 // top level variables
-var mapPoints, map, sv, panorama, markers = [], tweetPoints = [];
+var map, sv, panorama, markers = [];
 var pos, neg, neu, socket;
 var center = new google.maps.LatLng(40.758896, -73.985130);
+var stream = 0;
 
 
 function initMap() {
-	mapPoints = new google.maps.MVCArray([]);
 
     var mapProp = {
 		  	center:center,
@@ -18,22 +18,52 @@ function initMap() {
 	map = new google.maps.Map(document.getElementById("map-canvas"),mapProp);
     sv.getPanorama({location: center, radius: 100}, processSVData);
 
+    google.maps.event.addListener(map, 'click', function(e) {
+                document.getElementById("center").value = e.latLng.toUrlValue();
+    });
+
+    google.maps.event.addDomListener(document.getElementById("search"),"click", searchkw);
+
+    google.maps.event.addDomListener(document.getElementById("realtime"), "click", function() {
+        var elem = document.getElementById("realtime");
+        if (elem.value=="Start Real-Time") {
+            stream = 1;
+            elem.value = "Stop Real-Time";
+        }
+        else {
+            stream = 0;
+            elem.value = "Start Real-Time";
+        }
+    });
+
+
 	startListening();
 }
 
 function startListening() {
 	socket = io.connect();
 	socket.on('tweets:connected', function (msg) {
-        //alert(msg.msg);
+        alert(msg.msg);
 	});
 
 	socket.on('tweets:channel', function (tweet) {
-		if (tweet.coordinates !== undefined) {
-			tweetPoints.push(tweet);
-			mapPoints.push(new google.maps.LatLng(tweet.coordinates[1], tweet.coordinates[0]));
-			addMarker(tweet);
-		}
+        if (stream == 1) {
+		    if (tweet.coordinates !== undefined) {
+			    addMarker(tweet);
+		    }
+        }
 	});
+
+    socket.on('search:request', function (res) {
+        if (stream == 0) {
+            if (res.length == 0) {
+                alert('No tweet post recently contains this keyword.');
+            }
+            for (i=0; i<res.length; i++) {
+                addMarker(res[i]);
+            }
+        }
+    });
 }
 
 function processSVData(data, status) {
@@ -63,17 +93,43 @@ function addMarker (tweet) {
 		neu += 1;
 	}
 
-	markers.push(new google.maps.Marker({
-		position: {lat: tweet.coordinates[1], lng: tweet.coordinates[0]},
+    var marker = new google.maps.Marker({
+		position: {lat: tweet.lat, lng: tweet.lng},
 		map: map,
 		icon: icon,
-		animation: google.maps.Animation.DROP,
-		title: tweet.text
-	}));
+		animation: google.maps.Animation.DROP
+	})
+
+    var info = new google.maps.InfoWindow({ content: '<div id="content"><div id="siteNotice"></div><h1 id="firstHeading" class="firstHeading">'+obj.usr+'</h1><div id="bodyContent"><p>'+obj.txt+'</p>'});
+
+    marker.addListener('click', function() {
+        map.setCenter(marker.getPosition());
+        info.open(map, marker);
+        sv.getPanorama({location: marker.getPosition(), radius: 100}, processSVData);
+    });
+
+	markers.push(marker);
 }
+
+function searchkw(){
+    stream = 0;
+    var elem = document.getElementById("realtime");
+    elem.value = "Start Real-Time";
+    for (i=0; i<markers.length; i++) {
+        markers[i].setMap(null);
+    }
+    markers = [];
+    map.setZoom(2);
+    var keyword = $("#kw").val();
+    var center = $("#center").val();
+    var radius = $("#radius").val();
+    if ((center=="" && radius!="") || (center!="" && radius=="")) {
+        alert('Center and radius should be both valid or both null.');
+    }else {
+        socket.emit('search:request', {keyword: keyword, center: center, radius: radius});
+    }
+}
+
 
 google.maps.event.addDomListener(window, 'load', initMap);
 
-
-$(document).ready(function() {
-});

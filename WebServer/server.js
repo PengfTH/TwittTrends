@@ -25,51 +25,13 @@ var Twitter = require('twitter');
 
 var curSocket = undefined;
 var count = 0;
-var client = SNSClient(function(err, message) {
-    tweet = JSON.parse(message["Message"]);
-    count += 1;
-    console.log("SNS #" + count + " : New Tweet Received");
-    if (curSocket !== undefined) {
-    	curSocket.emit("tweets:channel", tweet);
-    } else {
-	console.log("No socket connection defined");
-    }
-});
-
-/*app.post('/', function(request, response) {
-    console.log("posthttp");
-    client(request, response);
-    var type = request.body.Type;
-    if (type == 'SubscriptionConfirmation') {
-        console.log('SNS');
-        var req = require('request');
-        var url = body['SubscribeURL'];
-        response.send(req.get(url));
-    }
-    else if (type=='Notification') {
-        console.log('SNS');
-        var msg = body['Message'];
-        curSocket.emit("tweets::message", {msg: msg});
-    }
-    var req = require('request');
-    response.send(req.get('http://google.com'));
-
-}); */
-
-/*app.post('/newTweet', function (request, response) {
-    client(request, response);
-});*/
 
 function handleIncomingMessage( msgType, msgData ) {
     if( msgType === 'SubscriptionConfirmation') {
         console.log(msgData);
-        //confirm the subscription.
-        /*sns.confirmSubscription({
-            Token: msgData.Token,
-            TopicArn: msgData.TopicArn
-        }, onAwsResponse );*/
     } else if ( msgType === 'Notification' ) {
         curSocket.emit("tweets:connected", {msg: msgData.Message});
+        //console.log(msgData.Message);
     } else {
         console.log( 'Unexpected message type ' + msgType );
     }
@@ -92,13 +54,21 @@ app.post('/', function(request, response){
     response.end( 'OK' );
 });
 
-
+function search(msg) {
+    console.log(msg.keyword);
+    console.log(msg.center);
+    console.log(msg.radius);
+}
 
 // beginning socket transmission in response to io.connect() at the client side
 io.on('connection', function(socket) {
 	curSocket = socket;
     console.log("new user connected");
     socket.emit("tweets:connected", { msg: "hello world from server" });
+
+    curSocket.on('search:request', function(msg) {
+		search(msg);
+	});
 });
 
 
