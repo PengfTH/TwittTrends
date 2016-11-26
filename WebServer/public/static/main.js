@@ -43,7 +43,7 @@ function initMap() {
 function startListening() {
 	socket = io.connect();
 	socket.on('tweets:connected', function (msg) {
-        alert(msg.msg);
+        //alert(msg.msg);
 	});
 
 	socket.on('tweets:channel', function (msg) {
@@ -82,7 +82,6 @@ function processSVData(data, status) {
 
 function addMarker (tweet) {
 	var icon = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
-    alert(tweet.sentiment);
 
 	if(tweet.sentiment == "positive") {
 		icon = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
