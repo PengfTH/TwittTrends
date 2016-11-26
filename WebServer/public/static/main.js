@@ -49,7 +49,7 @@ function startListening() {
 	socket.on('tweets:channel', function (msg) {
         //alert(msg.msg);
         if (stream == 1) {
-            tweet = msg.msg;
+            tweet = JSON.parse(msg.msg);
 			addMarker(tweet);
         }
 	});
