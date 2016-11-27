@@ -17,7 +17,6 @@ class Worker(Thread):
     def parseTweet(self, doc):
         tweet = {}
         tweet['coordinates'] = doc['coordinates']['coordinates']
-        print tweet['coordinates']
         tweet['timestamp_ms'] = doc['timestamp_ms']
         tweet['text'] = doc['text'].decode('utf-8')
         tweet['username'] = doc['user']['name'].decode('utf-8')
@@ -30,6 +29,7 @@ class Worker(Thread):
         txt = self.parseTweet(json.loads(self.tweet))
         sentRes = alchemy_language.sentiment(text=txt['text'])
         txt['sentiment'] = sentRes['docSentiment']['type']
+        # txt['sentiment'] = 'positive'
         self.nconn.publish(topic='arn:aws:sns:us-west-2:503791085592:twitter', message=json.dumps(txt))
         return
 

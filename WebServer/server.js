@@ -8,6 +8,8 @@ var io = require('socket.io')(http);
 var SNSClient = require('aws-snsclient');
 var sns = new AWS.SNS();
 
+var esclient = require('./connection');
+
 // setup static content
 app.use(express.static(__dirname + "/public"));
 
@@ -15,13 +17,46 @@ app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-var Twitter = require('twitter');
-/*var client = new Twitter({
-    consumer_key: 'o3nILrsPVcTdIXKc7DCFsrs8d',
-    consumer_secret: 'uUf7Tl0sPBqT0epJt7CPbm0y5lFMKimZDCrvumHjs0xiF9rlQd',
-    access_token_key: '783379170810290176-maE3Eqiv3K2Nj9Mm3ehEfNvXdnschSZ',
-    access_token_secret: 'ahIrQ0UoRPf90F8527N0ghveBd213S2qJHfKTAgTwFbER'
-});*/
+var index = "t3";
+var type = "tweet";
+
+var uuid = require("node-uuid")
+
+function tweet2es(tweet) {
+
+    var mapping = {
+        type :
+            {'properties':
+                {
+                    'timestamp_ms': {'type': 'date'},
+                    'text': {'type': 'string'},
+                    'coordinates': {'type': 'geo_point'},
+                    'username': {'type': 'string'},
+                    'sentiment': {'type': 'string'}
+                }
+            }
+    }
+
+    esclient.indices.exists({index:index}, function(error, response) {
+        if (!response) {
+            esclient.indices.create({
+                index: index,
+                body: {"mappings": mapping}
+            }, function (error, response, status) {
+                console.log(error, response, status);
+            });
+        }
+    });
+
+    esclient.create({
+        index: index,
+        id: uuid.v4(),
+        type: type,
+        body: tweet
+    }, function (error, response) {
+        //console.log(error, response);
+    })
+}
 
 var curSocket = undefined;
 var count = 0;
@@ -30,7 +65,10 @@ function handleIncomingMessage( msgType, msgData ) {
     if( msgType === 'SubscriptionConfirmation') {
         console.log(msgData);
     } else if ( msgType === 'Notification' ) {
-        curSocket.emit("tweets:channel", {msg: msgData.Message});
+        if (curSocket != undefined) {
+            curSocket.emit("tweets:channel", {msg: msgData.Message});
+        }
+        tweet2es(msgData.Message);
         //console.log(msgData.Message);
     } else {
         console.log( 'Unexpected message type ' + msgType );
@@ -56,6 +94,24 @@ app.post('/', function(request, response){
 
 function search(msg) {
     console.log(msg.keyword);
+    esclient.search({
+        index: "t3",
+        type:type,
+        body: {
+            query : {
+                match: {'text': msg.keyword}
+            },
+        }
+    }, function(error, response, status) {
+        if (error){
+            console.log("search error: " + error);
+        } else {
+            response.hits.hits.forEach(function(hit) {
+                curSocket.emit("search:request", {msg: hit['_source']})
+                //console.log(hit['_source']);
+            })
+        }
+    })
 }
 
 // beginning socket transmission in response to io.connect() at the client side

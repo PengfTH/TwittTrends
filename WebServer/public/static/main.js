@@ -28,6 +28,10 @@ function initMap() {
         var elem = document.getElementById("realtime");
         if (elem.value=="Start Real-Time") {
             stream = 1;
+            for (i=0; i<markers.length; i++) {
+                markers[i].setMap(null);
+            }
+            markers = [];
             elem.value = "Stop Real-Time";
         }
         else {
@@ -54,14 +58,9 @@ function startListening() {
         }
 	});
 
-    socket.on('search:request', function (res) {
+    socket.on('search:request', function (msg) {
         if (stream == 0) {
-            if (res.length == 0) {
-                alert('No tweet post recently contains this keyword.');
-            }
-            for (i=0; i<res.length; i++) {
-                addMarker(res[i]);
-            }
+            addMarker(msg.msg);
         }
     });
 }
@@ -112,18 +111,18 @@ function addMarker (tweet) {
 }
 
 function searchkw(){
-    stream = 0;
-    var elem = document.getElementById("realtime");
-    elem.value = "Start Real-Time";
-    for (i=0; i<markers.length; i++) {
-        markers[i].setMap(null);
-    }
-    markers = [];
-    map.setZoom(2);
     var keyword = $("#kw").val();
     if (keyword=="") {
         alert('Keyword cannot be null.');
     }else {
+        stream = 0;
+        var elem = document.getElementById("realtime");
+        elem.value = "Start Real-Time";
+        for (i=0; i<markers.length; i++) {
+            markers[i].setMap(null);
+        }
+        markers = [];
+        map.setZoom(2);
         socket.emit('search:request', {keyword: keyword});
     }
 }
